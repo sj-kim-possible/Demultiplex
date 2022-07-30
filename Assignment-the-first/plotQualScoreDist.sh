@@ -22,28 +22,24 @@ index2="/projects/bgmp/shared/2017_sequencing/1294_S1_L008_R3_001.fastq.gz"
 /usr/bin/time -v $script \
     -f $read1 \
     -l 101 \
-    -n 363246735 \
     -p "r1_dist.png"
 echo "R1 done"
 
 /usr/bin/time -v $script \
     -f $read2 \
     -l 101 \
-    -n 363246735 \
     -p "r2_dist.png"
 echo "R2 done"
 
 /usr/bin/time -v $script \
     -f $index1 \
     -l 8 \
-    -n 363246735 \
     -p "r3_dist.png"
 echo "R3 done"
 
 /usr/bin/time -v $script \
     -f $index2 \
     -l 8 \
-    -n 363246735 \
     -p "r4_dist.png"
 echo "R4 done"
 

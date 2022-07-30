@@ -31,7 +31,6 @@ def get_args():
     parser = argparse.ArgumentParser(description="A program to plot the distribution of quality scores per base.")
     parser.add_argument("-f", "--file", help="Please specify input *fastq.gz filename", required=True, type = str)
     parser.add_argument("-l", "--readLength", help="Please specify the length of reads", required = True, type=int)
-    parser.add_argument("-n", "--numRecords", help="Specify the number of records in the fastq file (line count div by 4)", required = True, type=int)
     parser.add_argument("-p", "--plotFilename", help="Please specify the plot filename as .png", required = True, type=str)
     return parser.parse_args()
 
@@ -48,6 +47,7 @@ def populate_list(file: str) -> tuple[list, int]:
     totalLines = 0
     with gzip.open(file, "rt") as fastq:
         for line in fastq:
+            line = line.strip("\n")
             totalLines += 1
             if totalLines % 4 == 0:
                 for i in range(len(totalQscores)):
@@ -65,7 +65,7 @@ for i in range(len(averages)):
 #                                                           #
 #############################################################
 
-fig, ax = plt.subplots(1, figsize=(20,10))
+fig, ax = plt.subplots(1, figsize=(15,8))
 ax.bar(range(0,args.readLength), averages, color='#15B01A', capsize=3)
 plt.xlabel("Read Position")
 plt.ylabel("Average Quality Score")

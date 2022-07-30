@@ -1,0 +1,49 @@
+=============
+> algorithm <
+=============
+
+indexes = set of given 24 indexes
+revCompIndexes = set of reverse complemented 24 indexes
+set line counter to 0
+open all four files 
+while True (hinging on the records string return with non-empty strings):
+      store each component of the record into variables (call function)
+            if the record comes back empty, break out of while loop
+      if index1 is not in the set of indexes (includes N): write to unknown
+      if index 2 is not in the set of revcomp indexes: write to unknown
+      elif: check the individual qscores of index 1 against threshold (average of qscore of all of index 1)
+            if any index1 qscore is below threshold, write record to low qual bin
+      if index2 qscore is below the threshold, write to low qual bin 
+      check index 1 with reverse complement of index 2
+            if they don't match, write to hopped file
+            if they match, add barcodes to header and write out to dual-matched file 
+
+========================
+> high level functions <
+========================
+function to reverse complement a string
+def reverse_comp(seq:str) --> str:
+      """ takes a dna string and returns the reverse complement """
+      validate_base_seq(seq) # make sure this is a DNA string
+      rev = seq[::-1]
+      rev_comp = string.translate()
+      return rev_comp
+
+function to grab 4 lines of files and store into variables
+def grab_record(filehandle: str, lineCount: int) --> 4 strings 
+      """ takes a filehandle and a line count and returns the record broken into 4 vars """
+      header = first line
+      sequence = second line
+      plus = third line
+      qscore = fourth line
+      return header, sequence, plus, qscore
+
+function to convert phred score
+def convert_phred(letter: str) -> int:
+    '''Converts single-character quality scores into an int phred score'''
+    return ord(letter)-33
+
+function to write out the record
+def write_record(header, sequence, plus, qscore, filehandle: str):
+      with open(file) 
+            header, seq, plus, qscore
