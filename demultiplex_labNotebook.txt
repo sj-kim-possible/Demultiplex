@@ -1,0 +1,540 @@
+#                        #     #                                                 
+#         ##   #####     ##    #  ####  ##### ###### #####   ####   ####  #    # 
+#        #  #  #    #    # #   # #    #   #   #      #    # #    # #    # #   #  
+#       #    # #####     #  #  # #    #   #   #####  #####  #    # #    # ####   
+#       ###### #    #    #   # # #    #   #   #      #    # #    # #    # #  #   
+#       #    # #    #    #    ## #    #   #   #      #    # #    # #    # #   #  
+####### #    # #####     #     #  ####    #   ###### #####   ####   ####  #    # 
+
+Bi622 2022
+
+██████  ███████ ███    ███ ██    ██ ██      ████████ ██ ██████  ██      ███████ ██   ██ 
+██   ██ ██      ████  ████ ██    ██ ██         ██    ██ ██   ██ ██      ██       ██ ██  
+██   ██ █████   ██ ████ ██ ██    ██ ██         ██    ██ ██████  ██      █████     ███   
+██   ██ ██      ██  ██  ██ ██    ██ ██         ██    ██ ██      ██      ██       ██ ██  
+██████  ███████ ██      ██  ██████  ███████    ██    ██ ██      ███████ ███████ ██   ██ 
+                                                                                        
+
+#############################################################
+#                                                           #
+#                 Assignment the First                      #
+#                                                           #
+#############################################################
+
+----------------
+| Instructions |
+----------------
+Goals: Our goal is to look through a lane of sequencing generated from the 2017 BGMP cohort’s 
+library preps and determine the level of index swapping and undetermined index-pairs, before and 
+after quality filtering of index reads. In order to do this, we must first demultiplex the data. 
+In Assignment the First, we will develop a strategy to de-multiplex samples to create 48 FASTQ files 
+that contain acceptable index pairs (read1 and read2 for 24 different index pairs), two FASTQ files 
+with index-hopped reads-pairs, and two FASTQ files undetermined (non-matching or low quality) index-pairs.
+
+De-multiplexing is necessary for downstream analyses.
+
+We submitted 24 indexed (dual matched) libraries for sequencing. The indexes are:
+
+B1	GTAGCGTA    A5	CGATCGAT    C1	GATCAAGG
+B9	AACAGCGA    C9	TAGCCATG    C3	CGGTAATC
+B3	CTCTGGAT    C4	TACCGGAT    A11	CTAGCTCA
+C7	CACTTCAC    B2	GCTACTCT    A1	ACGATCAG
+B7	TATGGCAC    A3	TGTTCCGT    B4	GTCCTAAG
+A12	TCGACAAG    C10	TCTTCGAC    A2	ATCATGCG
+C2	ATCGTGGT    A10	TCGAGAGT    B8	TCGGATTC
+A7	GATCTTGC    B10	AGAGTCCA    A8	AGGATAGC
+You can find a txt file containing these indexes on Talapas.
+
+4 FASTQ files are:
+
+1294_S1_L008_R1_001.fastq.gz
+1294_S1_L008_R2_001.fastq.gz
+1294_S1_L008_R3_001.fastq.gz
+1294_S1_L008_R4_001.fastq.gz
+
+in /projects/bgmp/shared/2017_sequencing/. 
+DO NOT copy or unzip these data. You may want to check out the gzip module in python.
+
+Please fill in your answers on Answers.md
+
+~~~~~~~~~~~~~~~~~~~~~~~ Part 1: Quality Score Distribution per-nucleotide ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--------------------
+| Data exploration |
+--------------------
+
+Interactive node:
+srun --account=bgmp --partition=bgmp --nodes=1 --ntasks-per-node=1 --time=0:30:00 --cpus-per-task=1 --pty bash
+squeue -u skim6
+
+Files live at:
+cd /projects/bgmp/shared/2017_sequencing/
+
+Big files!
+(base) [skim6@talapas-ln1 2017_sequencing]$ ls -lah
+total 47G
+drwxrwsr-x+  3 coonrod  bgmp 8.0K Jul 30  2018 .
+drwxrws--x+ 38 sdwagner bgmp 8.0K Jul  1 10:55 ..
+-rw-rwxr--+  1 coonrod  bgmp  20G Jul 30  2018 1294_S1_L008_R1_001.fastq.gz
+-rw-rwxr--+  1 coonrod  bgmp 2.6G Jul 30  2018 1294_S1_L008_R2_001.fastq.gz
+-rw-rwxr--+  1 coonrod  bgmp 2.8G Jul 30  2018 1294_S1_L008_R3_001.fastq.gz
+-rw-rwxr--+  1 coonrod  bgmp  23G Jul 30  2018 1294_S1_L008_R4_001.fastq.gz
+drwx--S---+  2 coonrod  bgmp 8.0K Jul  1 16:08 demultiplexed
+-rwxrwxr-x+  1 sdwagner bgmp  631 Aug  9  2021 indexes.txt
+-rw-rwxr--+  1 coonrod  bgmp  327 Aug 16  2017 README.txt
+
+First, head all the files:
+
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R1_001.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1265:1191 1:N:0:1
+GNCTGGCATTCCCAGAGACATCAGTACCCAGTTGGTTCAGACAGTTCCTCTATTGGTTGACAAGGTCTTCATTTCTAGTGATATCAACACGGTGTCTACAA
++
+A#A-<FJJJ<JJJJJJJJJJJJJJJJJFJJJJFFJJFJJJAJJJJ-AJJJJJJJFFJJJJJJFFA-7<AJJJFFAJJJJJF<F--JJJJJJF-A-F7JJJJ
+@K00337:83:HJKJNBBXX:8:1101:1286:1191 1:N:0:1
+CNACCTGTCCCCAGCTCACAGGACAGCACACCAAAGGCGGCAACCCACACCCAGTTTTACAGCCACACAGTGCCTTGTTTTACTTGAGGACCCCCCACTCC
++
+A#AAFJJJJJJJJJJFJJJJJJJJJJJJJJJJJJJJJJJJFJJJJJJJJJJJJJJAJJJJJJJJJJJJJJFJJJJJFFFFJJJJJJJJJJJJJJJJJJ77F
+@K00337:83:HJKJNBBXX:8:1101:1347:1191 1:N:0:1
+GNGGTCTTCTACCTTTCTCTTCTTTTTTGGAGGAGTAGAATGTTGAGAGTCAGCAGTAGCCTCATCATCACTAGATGGCATTTCTTCTGAGCAAAACAGGT
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R2_001.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1265:1191 2:N:0:1
+NCTTCGAC
++
+#AA<FJJJ
+@K00337:83:HJKJNBBXX:8:1101:1286:1191 2:N:0:1
+NACAGCGA
++
+#AAAFJJJ
+@K00337:83:HJKJNBBXX:8:1101:1347:1191 2:N:0:1
+NTCCTAAG
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R3_001.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1265:1191 3:N:0:1
+NTCGAAGA
++
+#AAAAJJF
+@K00337:83:HJKJNBBXX:8:1101:1286:1191 3:N:0:1
+NCGCTGTT
++
+#AAAFJ-A
+@K00337:83:HJKJNBBXX:8:1101:1347:1191 3:N:0:1
+NTTAGGAC
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R4_001.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1265:1191 4:N:0:1
+NTTTTGATTTACCTTTCAGCCAATGAGAAGGCCGTTCATGCAGACTTTTTTAATGATTTTGAAGACCTTTTTGATGATGATGATGTCCAGTGAGGCCTCCC
++
+#AAFAFJJ-----F---7-<FA-F<AFFA-JJJ77<FJFJFJJJJJJJJJJAFJFFAJJJJJJJJFJF7-AFFJJ7F7JFJJFJ7FFF--A<A7<-A-7--
+@K00337:83:HJKJNBBXX:8:1101:1286:1191 4:N:0:1
+NTGTGTAGACAAAAGTTTTCATGAGTCTGTAAGCTGTCTATTGTCTCCTGAAAAGAAACCAGAAGTTTTCCCCTAAATGTGTTTAGAATGCTTATTCTAAT
++
+#A-AFFJJFJJJJJJJJJJJJJJJJ<JAJFJJJJF<JFJJJAJJJJJJJJJJJJJJJJJJJFJJJAJJFJJJFJJJF<JJA-JJJ-<AFAF--FF<JAFJF
+@K00337:83:HJKJNBBXX:8:1101:1347:1191 4:N:0:1
+NAAATGCCATCTAGTGATGATGAGGCTACTGCTGACTCTCAACATTCTACTCCTCCAAAAAAGAAGAGAAAGATTCCAACCCCCAGAACCGATGACCGGCA
+
+From looking the files, r1 and r4 are biological files, and r2 and r3 are index files.
+The phred encoding is phred-33 because of the presence of # as a quality score in each file, indicating
+that ascii symbols between 33 and 64 exist in the file, which means this can't be phred-64.
+
+Read lengths:
+r1 = 101 + \n
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R1_001.fastq.gz | head -2 | tail -1 | wc
+      1       1     102
+r4 = 101 + \n 
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R4_001.fastq.gz | head -2 | tail -1 | wc
+      1       1     102
+do some bash/awk to figure out whether or not every single read is the same length - maybe sample the first million?
+
+r2 = 8 + \n
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R2_001.fastq.gz | head -2 | tail -1 | wc
+      1       1       9
+
+r3 = 8 + \n
+(base) [skim6@n278 2017_sequencing]$ zcat 1294_S1_L008_R3_001.fastq.gz | head -2 | tail -1 | wc
+      1       1       9
+
+How many records per file?
+R1: zcat 1294_S1_L008_R1_001.fastq.gz | wc -l
+1,452,986,940
+363246735 records (4 lines per record)
+
+R2: zcat 1294_S1_L008_R2_001.fastq.gz | wc -l 
+1452986940
+363246735 records
+
+R3: zcat 1294_S1_L008_R3_001.fastq.gz | wc -l 
+1452986940
+363246735 records
+
+R4: zcat 1294_S1_L008_R4_001.fastq.gz | wc -l
+1452986940
+363246735 records
+
+# notes from teaching staff:
+the indexes are reverse complements of each other
+
+look at the first 5 barcodes in the biological headers and the indexes 
+also look at it later in the file...like 1millionth line
+
+------------------------------
+| Quality score distribution |
+------------------------------
+
+Make unit test from top 100 lines from r1
+(base) [skim6@n278 Assignment-the-first]$ zcat /projects/bgmp/shared/2017_sequencing/1294_S1_L008_R1_001.fastq.gz | head -100 > part1_test.fastq
+(base) [skim6@n278 Assignment-the-first]$ ls
+Answers.md  part1_test.fastq  README.md
+(base) [skim6@n278 Assignment-the-first]$ head part1_test.fastq 
+@K00337:83:HJKJNBBXX:8:1101:1265:1191 1:N:0:1
+GNCTGGCATTCCCAGAGACATCAGTACCCAGTTGGTTCAGACAGTTCCTCTATTGGTTGACAAGGTCTTCATTTCTAGTGATATCAACACGGTGTCTACAA
++
+A#A-<FJJJ<JJJJJJJJJJJJJJJJJFJJJJFFJJFJJJAJJJJ-AJJJJJJJFFJJJJJJFFA-7<AJJJFFAJJJJJF<F--JJJJJJF-A-F7JJJJ
+@K00337:83:HJKJNBBXX:8:1101:1286:1191 1:N:0:1
+CNACCTGTCCCCAGCTCACAGGACAGCACACCAAAGGCGGCAACCCACACCCAGTTTTACAGCCACACAGTGCCTTGTTTTACTTGAGGACCCCCCACTCC
++
+A#AAFJJJJJJJJJJFJJJJJJJJJJJJJJJJJJJJJJJJFJJJJJJJJJJJJJJAJJJJJJJJJJJJJJFJJJJJFFFFJJJJJJJJJJJJJJJJJJ77F
+@K00337:83:HJKJNBBXX:8:1101:1347:1191 1:N:0:1
+GNGGTCTTCTACCTTTCTCTTCTTTTTTGGAGGAGTAGAATGTTGAGAGTCAGCAGTAGCCTCATCATCACTAGATGGCATTTCTTCTGAGCAAAACAGGT
+(base) [skim6@n278 Assignment-the-first]$ gzip part1_test.fastq 
+(base) [skim6@n278 Assignment-the-first]$ ls
+Answers.md  part1_test.fastq.gz  README.md
+^gzip to make sure script can handle gzipped file
+
+running the plotting script:
+sbatch plotQualScoreDist.sh
+
+Hamming distsance!
+How to make a quality score cutoff call?? 
+do we want to keep the indexes that have quality scores that are good ON AVERAGE per sequence? 
+or are we looking at quality scores per base??? Do we throw out the sequence with an index that
+has one base with a quailty score of 2 and the rest are 40's? 
+could calculate the hamming distance between all the barcodes to check how "close" each barcode
+is to each other to determine if the index is different enough from everything else that it
+would be okay to keep the case of one quality score of 2 but the rest are 40's. 
+
+~~~~~~~~~~~~~~~~~~~~~~~ Part 2: Develop an algorithm to de-multiplex the samples ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+----------------
+| Instructions |
+----------------
+Write up a strategy (NOT A SCRIPT) for writing an algorithm to de-multiplex files and reporting index-hopping. 
+That is, given four input FASTQ files (2 with biological reads, 2 with index reads) and the 24 known indexes 
+above, demultiplex reads by index-pair, outputting one R1 FASTQ file and one R2 FASTQ file per matching 
+index-pair, another two FASTQ files for non-matching index-pairs (index-hopping), and two additional FASTQ 
+files when one or both index reads are unknown or low quality (do not match the 24 known indexes 
+[this includes indexes with 'N's in them] or do not meet a quality score cutoff). Add the sequence of 
+the index-pair to the header of BOTH reads in all of your FASTQ files for all categories (e.g. add 
+“AAAAAAAA-CCCCCCCC” to the end of headers of every read pair that had an index1 of AAAAAAAA and an 
+index2 of CCCCCCCC; this pair of reads would be in the unknown category as one or both of these indexes 
+do not match the 24 known indexes).
+
+Additionally, your algorithm should report the number of read-pairs with properly matched indexes 
+(per index-pair), the number of read pairs with index-hopping observed, and the number of read-pairs with 
+unknown index(es). You should strive to report values for each possible pair of indexes (both swapped and 
+dual matched). You should not write any code for this portion of the assignment. 
+Be sure to:
+Define the problem
+Determine/describe what output would be informative
+Write examples (unit tests!):
+Include four properly formatted input FASTQ files with read pairs that cover all three categories (dual matched, index-hopped, unknown index)
+Include the appropriate number of properly formatted output FASTQ files given your input files
+Develop your algorithm using pseudocode
+Determine high level functions
+Description/doc string – What does this function do?
+Function headers (name and parameters)
+Test examples for individual functions
+Example: If you were writing a the function convert_phred(letter), a test example could be
+Input: I
+Expected output: 40
+Return statement
+
+-------------
+| Responses |
+-------------
+
+1. Define the problem
+Given 4 fastq files and 24 known indexes, the output should be demultiplexed files that
+have an R1.fastq and R2.fastq per matching index-pair, hopped_R1.fastq and hopped_R2.fastq for index
+hopped records, unknown_R1.fastq and unknown_R2.fastq for unknown and lowQual_R1.fastq and lowQual_R2.fastq
+for low quality index reads. Make these sorting decisions based off of corresponding index matching. Each 
+record is matched to its physical location on the flow cell by position: first record in R1 corresponds to 
+first record in R2 and R3 and R4, and so on and so forth. Also need to report the number of read-pairs with 
+properly matched idexes, the number of index hopping, and the number of unknown indexes.
+
+
+2. Describe output
+The output files will include dual-matched fastq files for each barcode, an R1 and an R2 for each barcode to 
+represent read 1 and read 2: paired ends. Additionally, there will be two files each for different flavors of
+sorting: hopped, unknown, and low quality.
+
+=============
+> algorithm <
+=============
+
+indexes = set of given 24 indexes
+revCompIndexes = set of reverse complemented 24 indexes
+set line counter to 0
+open all four files 
+while True (hinging on the records string return with non-empty strings):
+      store each component of the record into variables (call function)
+            if the record comes back empty, break out of while loop
+      if index1 is not in the set of indexes (includes N): write to unknown
+      if index 2 is not in the set of revcomp indexes: write to unknown
+      elif: check the individual qscores of index 1 against threshold (average of qscore of all of index 1)
+            if any index1 qscore is below threshold, write record to low qual bin
+      if index2 qscore is below the threshold, write to low qual bin 
+      check index 1 with reverse complement of index 2
+            if they don't match, write to hopped file
+            if they match, add barcodes to header and write out to dual-matched file 
+
+========================
+> high level functions <
+========================
+function to reverse complement a string
+def reverse_comp(seq:str) --> str:
+      """ takes a dna string and returns the reverse complement """
+      validate_base_seq(seq) # make sure this is a DNA string
+      rev = seq[::-1]
+      rev_comp = string.translate()
+      return rev_comp
+
+function to grab 4 lines of files and store into variables
+def grab_record(filehandle: str, lineCount: int) --> 4 strings 
+      """ takes a filehandle and a line count and returns the record broken into 4 vars """
+      header = first line
+      sequence = second line
+      plus = third line
+      qscore = fourth line
+      return header, sequence, plus, qscore
+
+function to convert phred score
+def convert_phred(letter: str) -> int:
+    '''Converts single-character quality scores into an int phred score'''
+    return ord(letter)-33
+
+function to write out the record
+def write_record(header, sequence, plus, qscore, filehandle: str):
+      with open(file) 
+            header, seq, plus, qscore
+
+#############################################################
+#                                                           #
+#                 Assignment the Second                     #
+#                                                           #
+#############################################################
+
+Provide feedback to fellow classmates on their psuedocode via "issues" on github.
+
+#############################################################
+#                                                           #
+#                 Assignment the Third                      #
+#                                                           #
+#############################################################
+
+Write demux!
+----------------
+| Instructions |
+----------------
+Write your code to demultiplex the samples. Be sure to:
+
+Incorporate feedback from peer code reviews
+Utilize appropriate functions (perhaps you want to import bioinfo???)
+Sufficiently comment your code/use docstrings/use type annotations on functions
+Use unit tests on functions/entire algorithm to ensure it works properly
+Create a useful report for the end user of your code
+Use argparse to "generalize" your code
+Be mindful of "simple" things you can do to optimize your code
+Follow the specifications laid out in Assignment the First for the code
+Unclear? Ask!
+Modules that are fair game to import:
+bioinfo
+argparse
+math
+gzip
+numpy
+matplotlib
+itertools
+
+Final work will be submitted on GitHub. Make sure your folder is well organized and final output is 
+clearly labeled/summarized (a markdown file would be much appreciated!!). Use your code to demultiplex 
+the samples and report:
+
+Percentage of reads from each sample
+Overall amount of index swapping
+Any figures/any other relevant data your code output
+
+---------
+| Notes |
+---------
+
+The efficiecncy of looking things up quickly in a dictionary is lost when searching through its values.
+Hence, this is why we have two different sets for the indexes and their reverse complements - not dictionaries.
+
+argparse: action="store_true" - means that if I don't pass the flag, then automatically stored as True
+If I want the False case, then pass the flag and it doesn't need arguments. 
+^ useful toggle for testing to have output be in fastq format rather than zipped
+--> didn't end up needing this in the end, since I ran pigz separately after demuxing the fastq files.
+
+bash commands for testing while writing:
+./demultiplex.py -r1 ../TEST-input_FASTQ/test_input_R1.fastq.gz \
+-r2 ../TEST-input_FASTQ/test_input_R4.fastq.gz \
+-i1 ../TEST-input_FASTQ/test_input_R2.fastq.gz \
+-i2 ../TEST-input_FASTQ/test_input_R3.fastq.gz \
+-b ../TEST-input_FASTQ/testIndexes.txt \
+-o ./testOutput/
+
+---------------------------
+| runtime summary round 1 |
+---------------------------
+DEMUX
+demux: ran separate from zipping script. 
+Did NOT pass the -gz action because zipping algorithm (pigz - parallel gzip) needs to know all of
+the files in order to parallelize most efficiently. writing out .fastq.gz DURING demux will slow things 
+down since each chunk of data needs to be compressed one at a time. 
+Param:
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+
+runtime: Elapsed (wall clock) time (h:mm:ss or m:ss): 1:14:24
+
+from summary_stats.md:
+Total Number of Records: 363246735
+Total Unknown Records: 30783962
+Total Low Quality Records: 26964891
+Total Index Hopped Records: 517612
+Total Dual-Matched Records: 304980270
+add total by hand: 363,246,735 = woohoo the same as total records!
+
+verifying by: 
+cd /projects/bgmp/skim6/bioinfo/Bi622/Demultiplex/Assignment-the-third/demultiplexed/
+zcat *.fastq.gz | wc -l #takes a long time.....maybe not the wisest choice
+2,296,013,340 
+HMMMM THIS IS WEIRD. 
+54 fastq.gz files + 1 summary stat file 
+2,296,013,340 / 2 = 1,148,006,670 (because read 1 and read 2 are in this output folder)
+2,296,013,340 / 2 /4 = 287,001,668 (because each record is 4 lines)
+^ should be 363,246,735
+turns out:
+(base) [skim6@n278 demultiplexed]$ zcat TAGCCATG_TAGCCATG_R1.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1824:1701 1:N:0:1_TAGCCATG_TAGCCATG
+TTCCTTGGTAAAATTCACAGCCCAAGAGACAGCGAATCCAAATTGTATCATTATTTTGGCACTATTCCGGTCATCCCCACAACTGCTTCCATCGTGTGTCG
++
+AAFFFFJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJFJJJJJJJJJJJJJJJJ@K00337:83:HJKJNBBXX:8:1101:2169:1701 1:N:0:1_TAGCCATG_TAGCCATG
+CTTCGTGTCCTGCCCTCTCTGACTGCTCTCTTTGGGTCCCAGCCCCAGTGACTTGCATTTGAACAAGGTCTTTGTCTGCTTTGAGCTGTGAGGCTCATCCT
++
+AAFFFJJFFJJJJJJJJJJJJJJJJJFJJJJJJJJFFJJJJFJJJJJJJJJJJJJJJJJJFJJJJJJJFJJJJJJJJJJFJJJJJJJJFFJJFJFJFJJJJ@K00337:83:HJKJNBBXX:8:1101:3873:1701 1:N:0:1_TAGCCATG_TAGCCATG
+GCTGGATCCAACAGGAAATCAGTCCTTCCCTTGTTTACCTAAACTGTTACACCAAAACAGGCTTCCTGTGCCAGATGAAGGAGATGACAGAATGGAGGAGA
++
+AAFFFJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ@K00337:83:HJKJNBBXX:8:1101:3894:1701 1:N:0:1_TAGCCATG_TAGCCATG
+LOOKS WEIRD. BECAUSE I FORGOT TO ADD A \n TO RECORDS WRITTEN OUT TO DUAL-MATCHED FILES. AAHHHHGG
+
+PIGZ:
+#SBATCH --cpus-per-task=12
+#SBATCH --ntasks-per-node=1
+#SBATCH --nodes=1
+
+Elapsed (wall clock) time (h:mm:ss or m:ss): 27:24.29 #FAST. SO SO SO FAST. Ran this @ 11pm when only 3
+jobs were using the cluster.
+
+---------------------------
+| runtime summary round 2 |
+---------------------------
+DEMUX:
+demux: job id 21902266
+Param:
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+
+Elapsed (wall clock) time (h:mm:ss or m:ss): 1:12:18
+
+summary_stats: same as run 1
+Total Number of Records: 363246735
+Total Unknown Records: 30783962
+Total Low Quality Records: 26964891
+Total Index Hopped Records: 517612
+Total Dual-Matched Records: 304980270
+
+(base) [skim6@talapas-ln1 demultiplexed]$ zcat TACCGGAT_TACCGGAT_R2.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1174:1701 4:N:0:1_TACCGGAT_TACCGGAT
+CTAAGGCAGAGACTGACCACCTATTTGACCTCAGCCGCCGATTTGATCTGCGCCTCGTAGTTATTCACGATCGGTATGACCACCAGCAGTTCAAGAAGCGC
++
+-AAFAJJJFJJFFFJJJJJJJFFF7JJ<J7JFJA<7A-A7F-AFFJJF7JJ<F--AF<FF<AFJJJ-AFAJJJ<FAJAJJJFJA-FFAJF7F<<A7F-<7-
+@K00337:83:HJKJNBBXX:8:1101:1296:1701 4:N:0:1_TACCGGAT_TACCGGAT
+TTCATGGTGCTATTATTTCAGTCACGAAATCCAAGTGCCCCTCCTATGTGGGAGTTACAGGAATCCTTCTGCAGGAGACCAAACATGTCTTTAAGATCATC
++
+AAAF<JJFFJFJFJJJJJJJFFJJJJJJJJJJJJJF7JFJJJJJJJFJJJJJJJJJJJJFJJJJJJJJJJJJJJJJJFFJFJJJJJJJJJFJJJJJJFAF-
+@K00337:83:HJKJNBBXX:8:1101:1336:1701 4:N:0:1_TACCGGAT_TACCGGAT
+AGCTGCTTGAAAAAATAGAAGAAAAGCAGAAAGAACTGGCAGAAACAGAACCTAAATTCAACAGCGTAAAAGAAAAAGAAGAGCGAGGAATTGCGAGGTTG
+
+Looks normal
+
+get interactive node:
+srun --account=bgmp --partition=bgmp --nodes=1 --ntasks-per-node=1 --time=0:30:00 --cpus-per-task=4 --pty bash
+check linecounts:
+zcat *.fastq.gz | wc -l
+2,905,973,880 
+div by 2 for r1 and r2, div by 4 for 4 lines per record
+2,905,973,880 / (2 * 4) = 363,246,735 == 363,246,735 --> equals total records! yay!
+
+PIGZ:
+Elapsed (wall clock) time (h:mm:ss or m:ss): 25:59.49
+
+(base) [skim6@n278 demultiplexed]$ ls -lah
+total 39G
+drwxrws---+ 2 skim6 bgmp 4.0K Aug  8 13:36 .
+drwxrws---+ 5 skim6 bgmp 4.0K Aug  8 13:10 ..
+-rw-rw----+ 1 skim6 bgmp 404M Aug  8 12:42 AACAGCGA_AACAGCGA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 449M Aug  8 12:42 AACAGCGA_AACAGCGA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 370M Aug  8 12:42 ACGATCAG_ACGATCAG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 397M Aug  8 12:42 ACGATCAG_ACGATCAG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 509M Aug  8 12:42 AGAGTCCA_AGAGTCCA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 560M Aug  8 12:42 AGAGTCCA_AGAGTCCA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 405M Aug  8 12:42 AGGATAGC_AGGATAGC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 458M Aug  8 12:42 AGGATAGC_AGGATAGC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 491M Aug  8 12:42 ATCATGCG_ATCATGCG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 506M Aug  8 12:42 ATCATGCG_ATCATGCG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 314M Aug  8 12:42 ATCGTGGT_ATCGTGGT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 360M Aug  8 12:42 ATCGTGGT_ATCGTGGT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 190M Aug  8 12:42 CACTTCAC_CACTTCAC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 216M Aug  8 12:42 CACTTCAC_CACTTCAC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 258M Aug  8 12:42 CGATCGAT_CGATCGAT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 274M Aug  8 12:42 CGATCGAT_CGATCGAT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 227M Aug  8 12:42 CGGTAATC_CGGTAATC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 274M Aug  8 12:42 CGGTAATC_CGGTAATC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 798M Aug  8 12:42 CTAGCTCA_CTAGCTCA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 867M Aug  8 12:42 CTAGCTCA_CTAGCTCA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.6G Aug  8 12:42 CTCTGGAT_CTCTGGAT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.8G Aug  8 12:42 CTCTGGAT_CTCTGGAT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 307M Aug  8 12:42 GATCAAGG_GATCAAGG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 365M Aug  8 12:42 GATCAAGG_GATCAAGG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 173M Aug  8 12:42 GATCTTGC_GATCTTGC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 193M Aug  8 12:42 GATCTTGC_GATCTTGC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 326M Aug  8 12:42 GCTACTCT_GCTACTCT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 378M Aug  8 12:42 GCTACTCT_GCTACTCT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 374M Aug  8 12:42 GTAGCGTA_GTAGCGTA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 439M Aug  8 12:42 GTAGCGTA_GTAGCGTA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 408M Aug  8 12:42 GTCCTAAG_GTCCTAAG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 458M Aug  8 12:42 GTCCTAAG_GTCCTAAG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp  28M Aug  8 12:42 hopped_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp  29M Aug  8 12:42 hopped_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.8G Aug  8 12:42 lowQual_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 2.0G Aug  8 12:42 lowQual_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp  26K Aug  8 12:42 summary_stats.md
+-rw-rw----+ 1 skim6 bgmp 3.3G Aug  8 12:42 TACCGGAT_TACCGGAT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 4.0G Aug  8 12:42 TACCGGAT_TACCGGAT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 492M Aug  8 12:42 TAGCCATG_TAGCCATG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 569M Aug  8 12:42 TAGCCATG_TAGCCATG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 503M Aug  8 12:42 TATGGCAC_TATGGCAC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 563M Aug  8 12:42 TATGGCAC_TATGGCAC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 179M Aug  8 12:42 TCGACAAG_TCGACAAG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 202M Aug  8 12:42 TCGACAAG_TCGACAAG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 528M Aug  8 12:42 TCGAGAGT_TCGAGAGT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 609M Aug  8 12:42 TCGAGAGT_TCGAGAGT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 206M Aug  8 12:42 TCGGATTC_TCGGATTC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 239M Aug  8 12:42 TCGGATTC_TCGGATTC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.9G Aug  8 12:42 TCTTCGAC_TCTTCGAC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 2.2G Aug  8 12:42 TCTTCGAC_TCTTCGAC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 735M Aug  8 12:42 TGTTCCGT_TGTTCCGT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 798M Aug  8 12:42 TGTTCCGT_TGTTCCGT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.8G Aug  8 12:42 unknown_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 2.0G Aug  8 12:42 unknown_R2.fastq.gz
