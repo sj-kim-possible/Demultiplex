@@ -538,3 +538,97 @@ drwxrws---+ 5 skim6 bgmp 4.0K Aug  8 13:10 ..
 -rw-rw----+ 1 skim6 bgmp 798M Aug  8 12:42 TGTTCCGT_TGTTCCGT_R2.fastq.gz
 -rw-rw----+ 1 skim6 bgmp 1.8G Aug  8 12:42 unknown_R1.fastq.gz
 -rw-rw----+ 1 skim6 bgmp 2.0G Aug  8 12:42 unknown_R2.fastq.gz
+
+---------------------------
+| runtime summary round 3 |
+---------------------------
+Ran again to generate better summary/result statistics for easier plotting in the report.
+Demux: job id: 21959132
+
+Elapsed (wall clock) time (h:mm:ss or m:ss): 1:15:09
+
+pigz: job id: 21960009
+Elapsed (wall clock) time (h:mm:ss or m:ss): 24:43.35
+
+Total Number of Records: 363246735
+Unknown Records: 30783962, 8.474669978795541%
+Low Quality Records: 26964891, 7.423298932060601%
+Index Hopped Records: 517612, 0.1424959814160477%
+Dual-Matched Records: 304980270, 83.95953510772782%
+
+(base) [skim6@talapas-ln1 demultiplexed]$ ls -lah
+total 39G
+drwxrws---+ 2 skim6 bgmp 4.0K Aug 10 21:55 .
+drwxrws---+ 5 skim6 bgmp 4.0K Aug 11 11:13 ..
+-rw-rw----+ 1 skim6 bgmp 404M Aug 10 19:22 AACAGCGA_AACAGCGA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 449M Aug 10 19:22 AACAGCGA_AACAGCGA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 370M Aug 10 19:22 ACGATCAG_ACGATCAG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 397M Aug 10 19:22 ACGATCAG_ACGATCAG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 509M Aug 10 19:22 AGAGTCCA_AGAGTCCA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 560M Aug 10 19:22 AGAGTCCA_AGAGTCCA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 405M Aug 10 19:22 AGGATAGC_AGGATAGC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 458M Aug 10 19:22 AGGATAGC_AGGATAGC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 491M Aug 10 19:22 ATCATGCG_ATCATGCG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 506M Aug 10 19:22 ATCATGCG_ATCATGCG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 314M Aug 10 19:22 ATCGTGGT_ATCGTGGT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 360M Aug 10 19:22 ATCGTGGT_ATCGTGGT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 190M Aug 10 19:22 CACTTCAC_CACTTCAC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 216M Aug 10 19:22 CACTTCAC_CACTTCAC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 258M Aug 10 19:22 CGATCGAT_CGATCGAT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 274M Aug 10 19:22 CGATCGAT_CGATCGAT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 227M Aug 10 19:22 CGGTAATC_CGGTAATC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 274M Aug 10 19:22 CGGTAATC_CGGTAATC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 798M Aug 10 19:22 CTAGCTCA_CTAGCTCA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 867M Aug 10 19:22 CTAGCTCA_CTAGCTCA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.6G Aug 10 19:22 CTCTGGAT_CTCTGGAT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.8G Aug 10 19:22 CTCTGGAT_CTCTGGAT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 307M Aug 10 19:22 GATCAAGG_GATCAAGG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 365M Aug 10 19:22 GATCAAGG_GATCAAGG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 173M Aug 10 19:22 GATCTTGC_GATCTTGC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 193M Aug 10 19:22 GATCTTGC_GATCTTGC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 326M Aug 10 19:22 GCTACTCT_GCTACTCT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 378M Aug 10 19:22 GCTACTCT_GCTACTCT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 374M Aug 10 19:22 GTAGCGTA_GTAGCGTA_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 439M Aug 10 19:22 GTAGCGTA_GTAGCGTA_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 408M Aug 10 19:22 GTCCTAAG_GTCCTAAG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 458M Aug 10 19:22 GTCCTAAG_GTCCTAAG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp  28M Aug 10 19:22 hopped_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp  29M Aug 10 19:22 hopped_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.8G Aug 10 19:22 lowQual_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 2.0G Aug 10 19:22 lowQual_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp  26K Aug 10 19:22 summary_stats.txt
+-rw-rw----+ 1 skim6 bgmp 3.3G Aug 10 19:22 TACCGGAT_TACCGGAT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 4.0G Aug 10 19:22 TACCGGAT_TACCGGAT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 492M Aug 10 19:22 TAGCCATG_TAGCCATG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 569M Aug 10 19:22 TAGCCATG_TAGCCATG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 503M Aug 10 19:22 TATGGCAC_TATGGCAC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 563M Aug 10 19:22 TATGGCAC_TATGGCAC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 179M Aug 10 19:22 TCGACAAG_TCGACAAG_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 202M Aug 10 19:22 TCGACAAG_TCGACAAG_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 528M Aug 10 19:22 TCGAGAGT_TCGAGAGT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 609M Aug 10 19:22 TCGAGAGT_TCGAGAGT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 206M Aug 10 19:22 TCGGATTC_TCGGATTC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 239M Aug 10 19:22 TCGGATTC_TCGGATTC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.9G Aug 10 19:22 TCTTCGAC_TCTTCGAC_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 2.2G Aug 10 19:22 TCTTCGAC_TCTTCGAC_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 735M Aug 10 19:22 TGTTCCGT_TGTTCCGT_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 798M Aug 10 19:22 TGTTCCGT_TGTTCCGT_R2.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 1.8G Aug 10 19:22 unknown_R1.fastq.gz
+-rw-rw----+ 1 skim6 bgmp 2.0G Aug 10 19:22 unknown_R2.fastq.gz
+
+(base) [skim6@talapas-ln1 demultiplexed]$ zcat TCGACAAG_TCGACAAG_R2.fastq.gz | head
+@K00337:83:HJKJNBBXX:8:1101:1499:1701 4:N:0:1_TCGACAAG_TCGACAAG
+GATCTTGGTGCTGGGGGGCTACCTCCGTCTCAGCCGCAGCTGCCTTGTCAAGGGGTCCCCTGAAAGACATCACAAACAGCTCAAGATCTCCTTTAGTGAGA
++
+AAFFFJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJFJJJJJJJJJJJJJJFJJ
+@K00337:83:HJKJNBBXX:8:1101:2534:1701 4:N:0:1_TCGACAAG_TCGACAAG
+CCATCATTGGCCGTACAATGGTGGTCCATGAGAAACAAGATGACTTGGGCAAAGGTGGAAATGAAGAAAGTACAAAGACTGGAAATGCTGGGAGCCGCTTG
++
+AAFFFJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJFJJJJJJJJJJJJJJJJJJJJJJJJ
+@K00337:83:HJKJNBBXX:8:1101:2899:1701 4:N:0:1_TCGACAAG_TCGACAAG
+AGCTCCTGCCCCTCCCAAAGCCGAAGCCAAAGCGAAGGCCTTGAAAGCTAAGAAGGCGGTGCTGAAAGGCGTCCACAGCCACAAAAAGAAGAAGATCCGAA
+
+Looks good 
+
+Made a pie chart with proportions of dual-matched, hopped, low quality, and unknown out of total records: pie.py
+Sorted the hopped indexes by order of frequency. sort_hopped.py

@@ -114,7 +114,9 @@ unknownRecords = 0
 lowQualityRecords = 0
 hoppedRecords = 0
 dualMatchedRecords = 0
-indexCounts = {}
+unkLowCounts = {}
+hoppedCounts = {}
+dualMatchedCounts = {}
 
 
 #### [ open all 4 files that need parsing ] ####
@@ -139,35 +141,35 @@ with gzip.open(args.bioRead1, "rt") as r1, gzip.open(args.bioRead2, "rt") as r2,
             writeOut["unknown"][0].write(record1String)
             writeOut["unknown"][1].write(record2String)
             unknownRecords += 1
-            addOneToCount(indexCounts, "unknown")
+            addOneToCount(unkLowCounts, "unknown")
         
         # index 2 is not a valid barcode
         elif i2_seq not in revCompBarcodes:
             writeOut["unknown"][0].write(record1String)
             writeOut["unknown"][1].write(record2String)
             unknownRecords += 1
-            addOneToCount(indexCounts, "unknown")
+            addOneToCount(unkLowCounts, "unknown")
 
         # if the average quality score of index 1 is below 30
         elif bioinfo.qual_score(i1_qscore) < 30:
             writeOut["lowQual"][0].write(record1String)
             writeOut["lowQual"][1].write(record2String)
             lowQualityRecords += 1
-            addOneToCount(indexCounts, "lowQual")
+            addOneToCount(unkLowCounts, "lowQual")
         
         # if avg qual score of index 2 is below 30
         elif bioinfo.qual_score(i2_qscore) < 30:
             writeOut["lowQual"][0].write(record1String)
             writeOut["lowQual"][1].write(record2String)
             lowQualityRecords += 1
-            addOneToCount(indexCounts, "lowQual")
+            addOneToCount(unkLowCounts, "lowQual")
         
         # check hopped
         elif i1_seq != bioinfo.reverse_comp(i2_seq):
             writeOut["hopped"][0].write(record1String)
             writeOut["hopped"][1].write(record2String)
             hoppedRecords += 1
-            addOneToCount(indexCounts, f"{i1_seq}-{bioinfo.reverse_comp(i2_seq)}")
+            addOneToCount(hoppedCounts, f"{i1_seq}-{bioinfo.reverse_comp(i2_seq)}")
 
         # dual matched
         elif i1_seq == bioinfo.reverse_comp(i2_seq):
@@ -176,7 +178,7 @@ with gzip.open(args.bioRead1, "rt") as r1, gzip.open(args.bioRead2, "rt") as r2,
             r2_header += f"_{i1_seq}_{bioinfo.reverse_comp(i2_seq)}"
             writeOut[i1_seq][1].write(f"{r2_header}\n{r2_seq}\n{r2_plus}\n{r2_qscore}\n")
             dualMatchedRecords += 1
-            addOneToCount(indexCounts, f"{i1_seq}-{bioinfo.reverse_comp(i2_seq)}")
+            addOneToCount(dualMatchedCounts, f"{i1_seq}-{bioinfo.reverse_comp(i2_seq)}")
         
 # close the write out files
 for filename in writeOut:
@@ -186,10 +188,20 @@ for filename in writeOut:
 # compile stats into .txt
 with open(f"{args.outputDir}/summary_stats.txt", "w") as stats:
     stats.write(f"Total Number of Records: {totalRecords}\n")
-    stats.write(f"Total Unknown Records: {unknownRecords}\n")
-    stats.write(f"Total Low Quality Records: {lowQualityRecords}\n")
-    stats.write(f"Total Index Hopped Records: {hoppedRecords}\n")
-    stats.write(f"Total Dual-Matched Records: {dualMatchedRecords}\n")
-    stats.write(f"Index\tNumber of Records\tPercent of Total Records\n")
-    for record in indexCounts:
-        stats.write(f"{record}\t{indexCounts[record]}\t{indexCounts[record]/totalRecords}\n")    
+    stats.write(f"Unknown Records: {unknownRecords}, {unknownRecords/totalRecords*100}%\n")
+    stats.write(f"Low Quality Records: {lowQualityRecords}, {lowQualityRecords/totalRecords*100}%\n")
+    stats.write(f"Index Hopped Records: {hoppedRecords}, {hoppedRecords/totalRecords*100}%\n")
+    stats.write(f"Dual-Matched Records: {dualMatchedRecords}, {dualMatchedRecords/totalRecords*100}%\n")
+    stats.write(f"Unknown and Low Quality Totals:\n")
+    stats.write(f"Index1-Index2\tNumber of Records\tPercent of Total Records\n")
+    for record in unkLowCounts:
+        stats.write(f"{record}\t{unkLowCounts[record]}\t{unkLowCounts[record]/totalRecords}\n")
+    stats.write(f"Hopped Totals:\n")
+    stats.write(f"Index1-Index2\tNumber of Records\tPercent of Total Records\n")
+    for record in hoppedCounts:
+        stats.write(f"{record}\t{hoppedCounts[record]}\t{hoppedCounts[record]/totalRecords}\n")
+    stats.write(f"Dual-Matched Totals:\n")
+    stats.write(f"Index1-Index2\tNumber of Records\tPercent of Total Records\n")
+    for record in dualMatchedCounts:
+        stats.write(f"{record}\t{dualMatchedCounts[record]}\t{dualMatchedCounts[record]/totalRecords}\n")
+    
